@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+{% set login = app.session.get('user') %}
+{% block javascripts %}
+	<script src="{{ app.request.schemeAndHttpHost }}/js/productlist.js" defer></script>
+	<script src="{{ app.request.schemeAndHttpHost }}/js/formValidation.js"></script>
+	<script src="{{ app.request.schemeAndHttpHost }}/js/categories.js"></script>
+	<script>
+		window.addEventListener ('load', function () {
+			APICategories.load('categories');
+		});
+	</script>
+{% endblock %}
+{% block stylesheets %}
+	<link rel="stylesheet" href="{{ app.request.schemeAndHttpHost }}/css/popup.css">
+	<link
+	rel="stylesheet" href="{{ app.request.schemeAndHttpHost }}/css/shopcart.css">
+{# <style>
+		.navBody {
+			margin: 20px;
+		}
+	</style> #}
+{% endblock %}
+{% block body %}
+	<!-- Nav -->
+	{% embed "product/navbar.html.twig" %}
+		{% block navLeft %}
+			<a href="/" class="nav-item nav-link active">Home</a>
+			{% if login is not null and login.role == 'admin' %}
+				<a href="/manage" class="nav-item nav-link">Manage Product</a>
+			{% endif %}
+			
+		{% endblock %}
+		{% block navRight %}
+			<a href="#" data-toggle="modal" data-target="#cart" class="nav-item nav-link active">
+				<i class="bi bi-cart4"></i>
+				<span class='badge badge-warning' id='lblCartCount'>
+					<span class="total-count"></span>
+				</span>
+			</a>
+			{% if login is null %}
+				<a href="#" class="nav-item nav-link active" data-toggle="modal" data-target="#loginModal">
+					Login
+				</a>
+			{% else %}
+				<div class="btn-group">
+					<a href="#" class="nav-item nav-link dropdown-toggle" data-toggle="dropdown">{{login.username}}</a>
+					<div class="dropdown-menu">
+						<!--some actions
+						<div class="dropdown-divider"></div>-->
+						<a href="/logout" class="dropdown-item">Log Out</a>
+					</div>
+				</div>
+			{% endif %}
+
+		{% endblock %}
+	{% endembed %}
+
+
+	<!-- Main -->
+
+	<div class="container">
+	<div class="row">
+		<div id="toolbar">
+		<select class="form-control" id="categories">
+				<option value="all">All</option>
+		</select>
+	</div>
+	</div>
+		<div class="row" id="product-list">
+			Loading...
+		</div>
+	</div>
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="cart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<table class="show-cart table"></table>
+					<div>Total price: $<span class="total-cart"></span>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger clear-cart">Empty cart</button>
+					<button type="button" class="btn btn-primary">Order now</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--Login modal-->
+	<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0">
+					<h4 class="form-title text-center">Login</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="d-flex flex-column text-center">
+						<form action="#" id="login" novalidate>
+							<div class="form-group">
+								<input type="username" class="form-control" name="username" id="username1" placeholder="Your username..." required>
+								<div class="invalid-feedback" id="username-error">Please fill out this field.</div>
+							</div>
+							<div class="form-group">
+								<input type="password" class="form-control" name="password" id="password1" placeholder="Your password..." required>
+								<div class="invalid-feedback" id="password-error">Please fill out this field.</div>
+							</div>
+							<button type="submit" id="login" class="btn btn-primary btn-block btn-round">Login</button>
+						</form>
+					</div>
+				</div>
+				<div class="modal-footer d-flex justify-content-center">
+					<div class="signup-section">Not a member yet?
+						<a href="#a" class="text-primary">Sign Up</a>.
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}

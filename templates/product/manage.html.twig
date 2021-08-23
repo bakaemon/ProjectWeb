@@ -1,0 +1,218 @@
+{% extends 'base.html.twig' %}
+{% set login = app.session.get('user') %}
+
+{% block javascripts %}
+	<script src="{{ app.request.schemeAndHttpHost }}/js/manageProduct.js" defer></script>
+	<script src="{{ app.request.schemeAndHttpHost }}/js/dropzone.js"></script>
+	<script src="{{ app.request.schemeAndHttpHost }}/js/categories.js"></script>
+	<script>
+		window.addEventListener ('load', function () {
+			APIProduct.loadTable();
+			APICategories.load('new_categories');
+		});
+	</script>
+{% endblock %}
+{% block stylesheets %}
+	<link rel="stylesheet" href="{{ app.request.schemeAndHttpHost }}/css/dropzone.css">
+	<style>
+		body {
+			padding-top: 70px;
+		}
+		.table-wrapper {
+			width: 700px;
+			margin: 30px auto;
+			background: #fff;
+			padding: 20px;
+			box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+		}
+		.table-title {
+			padding-bottom: 10px;
+			margin: 0 0 10px;
+		}
+		.table-title h2 {
+			margin: 6px 0 0;
+			font-size: 22px;
+		}
+		.table-title .add-new {
+			float: right;
+			height: 30px;
+			font-weight: bold;
+			font-size: 12px;
+			text-shadow: none;
+			min-width: 100px;
+			border-radius: 50px;
+			line-height: 13px;
+		}
+		.table-title .add-new i {
+			margin-right: 4px;
+		}
+		table.table {
+			table-layout: fixed;
+		}
+		table.table tr th,
+		table.table tr td {
+			border-color: #e9e9e9;
+		}
+		table.table th i {
+			font-size: 13px;
+			margin: 0 5px;
+			cursor: pointer;
+		}
+		table.table th:last-child {
+			width: 100px;
+		}
+		table.table td a {
+			cursor: pointer;
+			display: inline-block;
+			margin: 0 5px;
+			min-width: 24px;
+		}
+		table.table td a.add {
+			color: #27C46B;
+		}
+		table.table td a.edit {
+			color: #FFC107;
+		}
+		table.table td a.delete {
+			color: #E34724;
+		}
+		table.table td i {
+			font-size: 19px;
+		}
+		table.table td a.add i {
+			font-size: 24px;
+			margin-right: -1px;
+			position: relative;
+			top: 3px;
+		}
+		table.table .form-control {
+			height: 32px;
+			line-height: 32px;
+			box-shadow: none;
+			border-radius: 2px;
+		}
+		table.table .form-control.error {
+			border-color: #f50000;
+		}
+		table.table td .add {
+			display: none;
+		}
+		table td input {
+			width: 100%;
+			display: block;
+		}
+		.dropzone {
+			border: 2px dashed #0087F7;
+			border-radius: 5px;
+			background: white;
+		}
+	</style>
+{% endblock %}
+{% block body %}
+	{% embed "product/navbar.html.twig" %}
+		{% block navLeft %}
+			<a href="/" class="nav-item nav-link">Home</a>
+			{% if login.role == 'admin' %}
+				<a href="/manage" class="nav-item nav-link active">Manage Product</a>
+			{% endif %}
+		{% endblock %}
+		{% block navRight %}{% endblock %}
+
+	{% endembed %}
+	<div class="container-lg">
+		<div class="table-responsive">
+			<div class="table-wrapper">
+				<div class="table-title">
+					<div class="row">
+						<div class="col-sm-8">
+							<h2>Product
+								<b>Details</b>
+							</h2>
+						</div>
+						<div class="col-sm-4">
+							<button type="button" class="btn btn-info add-new" data-target="#addNew" data-toggle="modal">
+								<i class="fa fa-plus"></i>
+								Add New</button>
+						</div>
+					</div>
+				</div>
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">Image</th>
+							<th scope="col">Name</th>
+							<th scope="col">Price</th>
+							<th scope="col">Category</th>
+							<th scope="col">Description</th>
+							<th scope="col">Action</th>
+						</tr>
+					</thead>
+					<tbody id="product-list"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modals-->
+	<div id="addNew" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form id="newProductForm" onsubmit="return createProduct(this);">
+					<div class="modal-header">
+						<h4 class="modal-title">Add Product</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Name</label>
+							<input type="text" name="name" class="form-control" required>
+						</div>
+						<div class="form-group">
+							<label>Image URL</label>
+							<input type="text" name="image" placeholder="https://" class="form-control" require>
+						</div>
+						<div class="form-group">
+							<label>Price</label>
+							<input type="text" name="price" class="form-control" required>
+						</div>
+						<div class="form-group">
+							<label>Category</label>
+							<select name="category_id" id="new_categories" class="form-control">
+								<option>--Choose one category--</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>Description</label>
+							<textarea name="description" class="form-control" required></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+						<input type="submit" class="btn btn-success" value="Add">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="imageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="productName">Undefined</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="dropzone dz-clickable" id="mydropzone">
+						<div class="dz-message d-flex flex-column">
+							<i class="material-icons text-muted">cloud_upload</i>
+							Drag &amp; Drop here or click
+						</div>
+					</div>
+					<div class="modal-footer"></div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}
